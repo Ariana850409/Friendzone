@@ -391,7 +391,7 @@ app.get('/timetest', async (req, res) => {
 })
 
 
-server.listen(5000)
+server.listen(8080)
 // 當發生連線事件
 io.on('connection', (socket) => {
     let userEmail;
