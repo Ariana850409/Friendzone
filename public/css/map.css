@@ -1,0 +1,224 @@
+/* map */
+
+.wrapper{
+    position: relative;
+    height: calc(100vh - 55px);
+    width: 100vw;
+    overflow: hidden;
+}
+
+#mapid {
+    height: calc(100vh - 55px);
+    width: 100vw;
+    z-index: 99;
+    position: absolute;
+}
+
+.locationNow{
+    color: #074a5c; 
+    font-size: 43px;
+    position: absolute;
+    z-index: 100;
+    top: 76px;
+    left: 7px;
+    cursor: pointer;
+}
+
+/* friend list */
+
+#friend-list{
+    width: 300px;
+    height: calc(100vh - 55px);
+    z-index: 101;
+    position: absolute;
+    right: 0;
+    background-color: #e6d7b5;
+    transition: all 0.3s;
+    overflow: scroll;
+}
+
+#friend-list.active {
+    right: -300px;
+}
+
+.myself{
+    padding: 15px 20px;
+    background-color: #7f4f24;
+}
+
+.myself-pic{
+    height: 50px;
+    width: 50px;
+    border-radius: 100%;
+    margin-right: 5px;
+    object-fit: cover;
+}
+
+.myself-name{
+    color: white;
+    font-size: 20px;
+    vertical-align: middle;
+    width: 150px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.nofriend-msg{
+    color: #7f4f24;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+}
+
+.friends{
+    padding: 6px 20px;
+}
+
+.friend-pic{
+    height: 50px;
+    width: 50px;
+    border-radius: 100%;
+    margin-right: 5px;
+    object-fit: cover;
+}
+
+.friend-name{
+    font-size: 20px;
+    color: #7f4f24;
+    vertical-align: middle;
+    width: 170px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.message-img{
+    height: 35px;
+    width: 35px;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #friend-list {
+        right: -300px;
+    }
+
+    #friend-list.active {
+        right: 0;
+    }
+}
+
+/* add friend pop-up window */
+.shadow{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    opacity: 0.25;
+    z-index: 1000;
+    display: none;
+}
+
+#addFriendWindow{
+    height: 195px;
+    width: 280px;
+    z-index: 1001;
+    position: fixed;
+    background-color: #115c70;
+    left: 50%;
+    top: 150px;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    display: none;
+}
+
+.window-header{
+    font-size: 18px;
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 0;
+    position: relative;
+}
+
+.close-img{
+    height: 20px;
+    position: absolute;
+    right: -10px;
+    top: 6px;
+    cursor: pointer;
+}
+
+#friend-request-btn{
+    margin-top: 20px;
+}
+
+.request-error-msg{
+    font-size: 16px;
+    padding: 5px 0;
+    color: rgb(212, 136, 136);
+    display: none;
+}
+
+.request-success-msg{
+    font-size: 16px;
+    padding: 5px 0;
+    color: rgb(106, 172, 155);
+    display: none;
+}
+
+/* 通知欄 */
+#inform-list{
+    width: 300px;
+    height: 450px;
+    z-index: 101;
+    position: absolute;
+    background-color: #78b5ce;
+    transition: all 0.3s;
+    overflow: scroll;
+    right: 300px;
+    top: -450px;
+}
+
+#inform-list.active {
+    top: 0px;
+}
+
+.noinform-msg{
+    width: 300px;
+    text-align: center;
+    display: none;
+}
+
+.informs{
+    padding: 3px 10px;
+}
+
+.inform-pic{
+    height: 40px;
+    width: 40px;
+    border-radius: 100%;
+    margin-right: 5px;
+    object-fit: cover;
+}
+
+.inform-msg{
+    font-size: 18px;
+    color: #7f4f24;
+    vertical-align: middle;
+    width: 235px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.inform-request-btn{
+    width: 30px;
+    margin: 3px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #inform-list {
+        right: 0;
+    }
+}

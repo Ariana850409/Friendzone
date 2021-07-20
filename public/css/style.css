@@ -1,0 +1,104 @@
+body{
+    background-color:#EED595;
+}
+#navbar{
+    background-color: #45a4c9;
+}
+.navbar-dark .navbar-brand {
+    color:#EED595;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color:#EED595;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.navbar-dark .navbar-toggler {
+    border-color: rgba(255,255,255,0.4);
+}
+
+section{
+    margin-top: 100px;
+}
+
+#start h1{
+    color: #7f4f24;
+}
+
+#start p,span{
+    font-weight: 400;
+    color: #96673e;
+}
+
+#registerForm{
+    display: none;
+}
+
+.previewPic{
+    height: 100px;
+    width: 100px;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+#uploadPicLabel{
+    padding: 5px;
+    width: 80px;
+}
+
+#uploadPicInput{
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+}
+
+.brown-link{
+    color: #96673e;
+    cursor: pointer;
+}
+
+.btn-primary{
+    background-color: #45a4c9;
+    border-color: #45a4c9;
+    margin-bottom: 5px;
+}
+
+#start .error-msg{
+    color: rgb(173, 31, 31);
+    margin-top: 5px;
+    display: none;
+}
+
+#start .success-msg{
+    color: rgb(24, 136, 108);
+    margin-top: 5px;
+    display: none;
+}
+
+#intro img{
+    width: 100%;
+    height: 220px;
+    object-fit: cover
+}
+
+#intro p{
+    font-size: 18px;
+}
+
+#intro .row{
+    padding: 50px 0;
+}
+
+#footer{
+    background-color: #4d606a;
+    height: 80px;
+}
+
+#footer h5{
+    line-height: 80px;
+    color:#EED595;
+}
+

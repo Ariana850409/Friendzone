@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Friend Zone</title>
+</head>
+
+<body">
+    <div id="navbar">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <a class="navbar-brand" href="#">Friend Zone</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeState('login');">登入</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeState('register');">註冊</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <section id="start">
+        <div class="container">
+            <h1 class="display-5 text-center">開啟尋找朋友的旅程吧！</h1>
+            <p class="lead text-center">輕鬆地分享你的所在位置來參與彼此的生活圈</p>
+            <form id="loginForm">
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <input type="email" class="form-control" id="loginInputEmail" aria-describedby="emailHelp"
+                            placeholder="請輸入電子郵件">
+                    </div>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <input type="password" class="form-control" id="loginInputPassword" placeholder="請輸入密碼">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" onclick="login();">登入</button>
+                    <br>
+                    <span>尚未有帳戶？</span><span class="register-link brown-link"
+                        onclick="changeState('register');">點此註冊</span>
+                </div>
+            </form>
+            <form id="registerForm">
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <img class="previewPic mx-auto d-block" src="../icon/user.png">
+                    </div>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <label class="btn btn-primary mx-auto d-block" id="uploadPicLabel">上傳頭貼
+                            <input type="file" accept="image/*" name="profile" id="uploadPicInput"
+                                onchange="handleFiles(this.files)">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <input type="text" class="form-control" id="registerInputName" placeholder="請輸入使用者姓名">
+                    </div>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <input type="email" class="form-control" id="registerInputEmail" aria-describedby="emailHelp"
+                            placeholder="請輸入電子郵件">
+                    </div>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <div class="col-10 col-md-5">
+                        <input type="password" class="form-control" id="registerInputPassword" placeholder="請輸入密碼">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="register();">註冊</button>
+                    <br>
+                    <span>已有帳戶？</span><span class="login-link brown-link" onclick="changeState('login');">點此登入</span>
+                </div>
+            </form>
+            <p class="error-msg text-center"></p>
+            <p class="success-msg text-center">註冊成功，請重新登入</p>
+        </div>
+        </div>
+    </section>
+    <section id="intro">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-4 offset-md-1">
+                    <img src="https://picsum.photos/400/300?random=1">
+                </div>
+                <div class="col-12 col-md-6">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
+                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
+                        facere, sequi non vitae.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-4 offset-md-1">
+                    <img src="https://picsum.photos/400/300?random=2">
+                </div>
+                <div class="col-12 col-md-6">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
+                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
+                        facere, sequi non vitae.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-4 offset-md-1">
+                    <img src="https://picsum.photos/400/300?random=3">
+                </div>
+                <div class="col-12 col-md-6">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
+                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
+                        facere, sequi non vitae.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section id="footer">
+        <div class="container">
+            <h5 class="text-center">©copyright</h5>
+        </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"
+        integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../js/member.js"></script>
+
+    </body>
+
+</html>

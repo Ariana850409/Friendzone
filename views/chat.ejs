@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chatroom</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/map.css">
+    <link rel="stylesheet" href="../css/chat.css">
+</head>
+
+<body onload="getChatData();">
+    <div class="shadow"></div>
+    <div id="addFriendWindow" class="container text-center">
+        <p class="window-header">新增好友
+            <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
+        </p>
+        <input type="text" class="form-control" placeholder="輸入好友帳號" id="friend-request-input">
+        <button class="btn btn-primary" id="friend-request-btn" onclick="sendFriendRequest();">送出好友邀請</button>
+        <p class="request-error-msg"></p>
+        <p class="request-success-msg">送出成功，等待好友回覆...</p>
+    </div>
+    <div id="navbar">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <a class="navbar-brand" href="/map">Friend Zone</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="logout();">登出</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle" id="informCollapse">通知</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="addFriend('open');">新增好友</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/chat">訊息</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">會員資料</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle" id="friendCollapse">好友名單</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <div class="wrapper">
+        <nav id="friend-list">
+            <div class="myself">
+                <img src="../icon/user.png" class="myself-pic">
+                <span class="myself-name"></span>
+            </div>
+            <div class="nofriend-msg">尚未有好友</div>
+        </nav>
+        <nav id="inform-list">
+            <div class="myself-name mt-3 noinform-msg">沒有通知。</div>
+        </nav>
+        <div class="row message-wrap">
+            <div class="col-12 col-md-4 offset-md-1" id="message-list">
+                <div class="nofriend-msg" id="nofriend-list">尚未有聊天記錄</div>
+            </div>
+            <div class="chatroom col-12 col-md-6">
+                <div class="chatzoom-header">
+                    <img src="../icon/return.png" class="return-icon" onclick="rwdAllroom();">
+                    <img src="../icon/user.png" class="chatzoom-pic">
+                    <span class="chatzoom-name"></span>
+                </div>
+                <div class="chatzoom-screen">
+                </div>
+                <div class="send-wrap">
+                    <textarea class="chatzoom-input"></textarea>
+                    <button class="chatzoom-send-btn">
+                        <img src="../icon/send.png" class="chatzoom-send-img" onclick="sendMessage();">
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <section id="footer">
+            <div class="container">
+                <h5 class="text-center">©copyright</h5>
+            </div>
+        </section>
+
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/de828d96e6.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"
+        integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../js/member.js"></script>
+    <script type="text/javascript" src="../js/chat.js"></script>
+</body>
+
+</html>
