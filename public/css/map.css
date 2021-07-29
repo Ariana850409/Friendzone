@@ -24,6 +24,11 @@
     cursor: pointer;
 }
 
+.map-icon{
+    border-radius: 100%;
+    object-fit: cover;
+}
+
 /* friend list */
 
 #friend-list{
@@ -72,7 +77,7 @@
 }
 
 .friends{
-    padding: 6px 20px;
+    padding: 6px 10px 6px 20px;
 }
 
 .friend-pic{
@@ -87,14 +92,23 @@
     font-size: 20px;
     color: #7f4f24;
     vertical-align: middle;
-    width: 170px;
+    width: 140px;
     display: inline-block;
     word-break: break-all;
 }
 
 .message-img{
-    height: 35px;
-    width: 35px;
+    margin-top: 5px;
+    height: 30px;
+    width: 32px;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+.call-img{
+    height: 40px;
+    width: 36px;
+    margin-left: 5px;
     vertical-align: top;
     cursor: pointer;
 }
@@ -167,6 +181,106 @@
     display: none;
 }
 
+/* video call */
+.incoming-call-div{
+    position: absolute;
+    z-index: 1010;
+    height: 200px;
+    width: 280px;
+    background-color: #115c70;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    padding: 15px;
+    display: none;
+}
+
+.incoming-friend-pic{
+    height: 50px;
+    width: 50px;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+.incoming-friend-name{
+    font-size: 20px;
+    color: white;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.incoming-call-img{
+    width: 55px;
+    height: 55px;
+    margin: 5px 10px;
+    cursor: pointer;
+}
+
+.call-div{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    z-index: 1002;
+    display: none;
+}
+
+#myVideo{
+    max-width: 20%;
+    max-height: 20%;
+    position: absolute;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transform: scaleX(-1);
+}
+
+#remoteVideo{
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    border-radius: 5px;
+}
+
+.call-control-div{
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.call-control-img{
+    width: 50px;
+    height: 50px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.end-call-hint{
+    position: absolute;
+    z-index: 1001;
+    height: 65px;
+    width: 280px;
+    background-color: #115c70;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #myVideo {
+        max-width: 30%;
+    }
+    .call-control-img{
+        width: 40px;
+        height: 40px;
+        margin: 0px 2px;
+    }    
+}
+    
 /* 通知欄 */
 #inform-list{
     width: 300px;

@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Map</title>
+    <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
@@ -24,6 +25,27 @@
         <button class="btn btn-primary" id="friend-request-btn" onclick="sendFriendRequest();">送出好友邀請</button>
         <p class="request-error-msg"></p>
         <p class="request-success-msg">送出成功，等待好友回覆...</p>
+    </div>
+    <div class="call-div">
+        <video id="myVideo" autoplay playsinline muted></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="call-control-div">
+            <img src="../icon/no-sound.png" id="muteAudioBtn" class="call-control-img" onclick="muteCall('audio');">
+            <img src="../icon/no-video.png" id="muteVideoBtn" class="call-control-img" onclick="muteCall('video');">
+            <img src="../icon/hangup-call.png" id="endCallBtn" class="call-control-img" onclick="endCall();">
+        </div>
+    </div>
+    <div class="text-center incoming-call-div">
+        <img class="incoming-friend-pic">
+        <span class="incoming-friend-name"></span>
+        <img src="../icon/pickup-call.png" class="incoming-call-img" onclick="responseCall(this,'pickup');">
+        <img src="../icon/hangup-call.png" class="incoming-call-img" onclick="responseCall(this,'hangup');">
+    </div>
+    <div class="container text-center end-call-hint">
+        <p class="window-header">
+            <span id="end-call-msg" class="window-header"></span>
+            <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
+        </p>
     </div>
     <div id="navbar">
         <div class="container-fluid">
@@ -96,6 +118,7 @@
         integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
         crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/de828d96e6.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
     <script type="text/javascript" src="../js/member.js"></script>
     <script type="text/javascript" src="../js/map.js"></script>
 </body>

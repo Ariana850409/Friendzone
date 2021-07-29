@@ -128,7 +128,8 @@ app.post('/latlng', async (req, res) => {
     try {
         let email = req.body.email
         let latlng = req.body.latlng
-        await db_Service.updateLatlng(email, latlng)
+        let timeNow = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+        await db_Service.updateLatlng(email, latlng, timeNow)
         res.json({
             ok: true,
         })
@@ -199,10 +200,10 @@ app.post('/addFriend', async (req, res) => {
         }
         await db_Service.addFriendRequest(user, friend, roomID)
         let result = await db_Service.getMemberData(user)
-        let friendName = result[0].username
-        let friendPic = result[0].pic
+        let myname = result[0].username
+        let mypic = result[0].pic
         // 加完好友向對方發送通知
-        await db_Service.addInform(user, friendName, friend, friendPic, 1)
+        await db_Service.addInform(friend, myname, user, mypic, 1, roomID)
         res.json({
             ok: true
         })
@@ -240,7 +241,7 @@ app.post('/acceptRequest', async (req, res) => {
         await db_Service.updateFriendRequest(myID, friendID, randomRoomId)
         let result = await db_Service.getMemberData(friendID)
         // 接受好友邀請後刪除通知
-        await db_Service.deleteInform(myID, friendID)
+        await db_Service.deleteInform(myID, friendID, 1)
         // 系統發送成為好友公告
         await db_Service.addConversation('system', randomRoomId, '你與對方已成為好友，開始聊天吧！', timeNow)
         await db_Service.updateLatestMsg(randomRoomId, '你與對方已成為好友，開始聊天吧！', timeNow)
@@ -263,7 +264,7 @@ app.delete('/rejectRequest', async (req, res) => {
         let friendID = req.body.friendID
         let result = await db_Service.deleteFriendRequest(friendID, myID)
         // 拒絕好友邀請後刪除通知
-        await db_Service.deleteInform(myID, friendID)
+        await db_Service.deleteInform(myID, friendID, 1)
         res.json({
             ok: true,
         })
@@ -318,6 +319,13 @@ app.post('/sendMessage', async (req, res) => {
         let timeNow = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
         await db_Service.addConversation(sender, roomID, content, timeNow)
         await db_Service.updateLatestMsg(roomID, content, timeNow)
+        let friend = await db_Service.getChatroomFriend(roomID, sender)
+        let receiver = friend[0].email
+        let myself = await db_Service.getMemberData(sender)
+        let myname = myself[0].username
+        let mypic = myself[0].pic
+        await db_Service.deleteInform(receiver, sender, 2)
+        await db_Service.addInform(receiver, myname, sender, mypic, 2, roomID)
         res.json({
             ok: true,
         })
@@ -420,9 +428,47 @@ io.on('connection', (socket) => {
     })
 
     let timeNow = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
-    socket.on("sendMessage", (sender, room, content) => {
-        io.to(room).emit("receiveMessage", sender, content, timeNow)
+    socket.on("sendMessage", async (sender, room, content) => {
+        io.to(room).emit("receiveMessage", sender, room, content, timeNow)
     })
+
+    // 發送好友邀請後即時通知
+    socket.on("sendFriendRequest", async (sender, receiver) => {
+        let result = await db_Service.getRequestInform(sender, receiver)
+        if (result.length !== 0) {
+            io.to(receiver).emit("receiveFriendRequest", result)
+        }
+    })
+
+    // 發送新訊息後即時通知
+    socket.on("sendMessageInform", async (sender, room) => {
+        let result = await db_Service.getMessageInform(sender, room)
+        if (result.length !== 0) {
+            io.to(result[0].userEmail).emit("receiveMessageInform", result)
+        }
+    })
+
+    // 撥出通話後通知
+    socket.on("callFriend", async (caller, roomID) => {
+        let result = await db_Service.getMemberData(caller)
+        if (result.length !== 0) {
+            socket.broadcast.to(roomID).emit("receiveCall", result, roomID)
+        }
+    })
+
+    // 撥出通話後通知
+    socket.on("answerCall", async (roomID, response) => {
+        socket.broadcast.to(roomID).emit("answerCall", roomID, response)
+    })
+
+    socket.on('peerConnectSignaling', ({ desc, candidate }, roomID) => {
+        socket.broadcast.to(roomID).emit('peerConnectSignaling', ({ desc, candidate }))
+    })
+
+    socket.on('endCall', (roomID) => {
+        socket.broadcast.to(roomID).emit('endCall')
+    })
+
 
 
     // socket.on("test", () => {

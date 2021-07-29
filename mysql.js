@@ -50,9 +50,9 @@ class DB_Service {
     }
 
     // 加入/更新經緯度進資料庫
-    updateLatlng(email, latlng) {
+    updateLatlng(email, latlng, timeNow) {
         return new Promise((resolve, reject) => {
-            let sql = `UPDATE members SET latlng = '${latlng}' WHERE email = '${email}'`
+            let sql = `UPDATE members SET latlng = '${latlng}',latlng_update = '${timeNow}' WHERE email = '${email}'`
             pool.query(sql, (err, result) => {
                 if (err) reject(new Error(err.message))
                 resolve(result)
@@ -77,9 +77,11 @@ class DB_Service {
             // let sql = `select username,email,pic from members where email in(select f1.user 
             //     from friendlist as f1 inner join friendlist as f2 on f1.user = f2.friend 
             //     and f1.friend = f2.user where f1.friend = '${email}')`
-            let sql = `SELECT members.username,members.email,members.pic,friendlist.roomID 
-                FROM friendlist INNER JOIN members ON friendlist.user=members.email WHERE 
-                friendlist.friend='${email}' AND roomID IS NOT NULL`
+            let sql = `SELECT members.username,members.email,members.pic,members.latlng,
+                DATE_FORMAT(members.latlng_update, '%Y-%m-%d %H:%i:%s') AS latlng_update,
+                friendlist.roomID FROM friendlist INNER JOIN members ON 
+                friendlist.user=members.email WHERE friendlist.friend='${email}' AND 
+                roomID IS NOT NULL`
             pool.query(sql, (err, result) => {
                 if (err) reject(new Error(err.message))
                 resolve(result)
@@ -133,10 +135,10 @@ class DB_Service {
     }
 
     // 新增通知列表
-    // content-> 1:發送好友邀請
-    addInform(user, friendName, friend, friendPic, content) {
+    // content-> 1:發送好友邀請 2:發送訊息
+    addInform(friend, myname, user, mypic, content, roomID) {
         return new Promise((resolve, reject) => {
-            let body = { userEmail: friend, friendName: friendName, friendEmail: user, friendPic: friendPic, content: content }
+            let body = { userEmail: friend, friendName: myname, friendEmail: user, friendPic: mypic, content: content, roomID: roomID }
             let sql = `INSERT INTO notification SET ?`
             pool.query(sql, body, (err, result) => {
                 if (err) reject(new Error(err.message))
@@ -146,10 +148,10 @@ class DB_Service {
     }
 
     // 取得通知列表
-    // content-> 1:發送好友邀請
+    // content-> 1:發送好友邀請 2:發送訊息
     getInform(myEmail) {
         return new Promise((resolve, reject) => {
-            let sql = `SELECT friendName,friendEmail,friendPic,content FROM notification WHERE userEmail = '${myEmail}' ORDER BY id DESC`
+            let sql = `SELECT friendName,friendEmail,friendPic,content,roomID FROM notification WHERE userEmail = '${myEmail}' ORDER BY id DESC`
             pool.query(sql, (err, result) => {
                 if (err) reject(new Error(err.message))
                 resolve(result)
@@ -157,10 +159,36 @@ class DB_Service {
         })
     }
 
-    // 刪除通知列表
-    deleteInform(myID, friendID) {
+    // 取得單一通知列表（即時好友邀請）
+    // content-> 1:發送好友邀請
+    getRequestInform(sender, receiver) {
         return new Promise((resolve, reject) => {
-            let sql = `DELETE FROM notification WHERE userEmail ='${myID}' AND friendEmail='${friendID}'`
+            let sql = `SELECT friendName,friendEmail,friendPic,content FROM notification WHERE userEmail = '${receiver}' AND friendEmail = '${sender}'`
+            pool.query(sql, (err, result) => {
+                if (err) reject(new Error(err.message))
+                resolve(result)
+            })
+        })
+    }
+
+    // 取得單一通知列表（即時訊息通知）
+    // content-> 2:發送新訊息
+    getMessageInform(sender, room) {
+        return new Promise((resolve, reject) => {
+            let sql = `SELECT userEmail,friendName,friendEmail,friendPic,content,roomID FROM notification WHERE friendEmail = '${sender}' AND roomID = '${room}'`
+            pool.query(sql, (err, result) => {
+                if (err) reject(new Error(err.message))
+                resolve(result)
+            })
+        })
+    }
+
+
+
+    // 刪除通知列表
+    deleteInform(myID, friendID, status) {
+        return new Promise((resolve, reject) => {
+            let sql = `DELETE FROM notification WHERE userEmail ='${myID}' AND friendEmail='${friendID}' AND content=${status}`
             pool.query(sql, (err, result) => {
                 if (err) reject(new Error(err.message))
                 resolve(result)

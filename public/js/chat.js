@@ -160,6 +160,8 @@ function sendMessage() {
             }).then(result => {
                 if (result.error) {
                     console.log(result.message);
+                } else if (result.ok) {
+                    socket.emit("sendMessageInform", email, roomID);
                 }
             })
     }
@@ -174,10 +176,18 @@ messageInput.addEventListener("keydown", (e) => {
     }
 })
 
-// 接收內容
-socket.on("receiveMessage", (sender, content, timeNow) => {
+// 接收聊天內容
+socket.on("receiveMessage", (sender, room, content, timeNow) => {
+    let parentDiv = document.getElementById("message-list");
+    let listChange = document.querySelector(`.messages[data-room='${room}']`);
+    let listChangeTime = document.querySelector(`.messages[data-room='${room}'] .message-time`);
+    let listChangeMsg = document.querySelector(`.messages[data-room='${room}'] .last-message`);
+    parentDiv.insertBefore(listChange, parentDiv.firstElementChild);
+    let listTime = timeNow.substr(5, 11).replace('-', '/');
+    listChangeTime.textContent = listTime;
+    listChangeMsg.textContent = content;
     let time = timeNow.split(' ')[1].substr(0, 5);
-    if (sender === email) {
+    if (room === roomID && sender === email) {
         let myMsg = document.createElement("div");
         myMsg.className = "my-message";
         myMsg.textContent = content;
@@ -186,7 +196,7 @@ socket.on("receiveMessage", (sender, content, timeNow) => {
         myTime.className = "my-chattime";
         myTime.textContent = time;
         myMsg.appendChild(myTime);
-    } else {
+    } else if (room === roomID && sender !== email) {
         let friendMsg = document.createElement("div");
         friendMsg.className = "friend-message";
         friendMsg.textContent = content;
@@ -198,6 +208,7 @@ socket.on("receiveMessage", (sender, content, timeNow) => {
     }
     screen.scrollTop = screen.scrollHeight;
 });
+
 
 function rwdAllroom() {
     document.querySelector(".chatroom").style.display = "none";

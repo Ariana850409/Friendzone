@@ -3,11 +3,12 @@ socket.on("connect", function () {
     console.log('success')
 });
 
+let myMapPic;
 async function getData() {
     await verify();
-    // 抓到個人資料放到側邊欄
+    // 抓到個人資料
     let email = localStorage.getItem("user")
-    fetch('/getMember', {
+    await fetch('/getMember', {
         method: 'POST',
         body: JSON.stringify({ email: email }),
         headers: new Headers({
@@ -23,10 +24,15 @@ async function getData() {
                 let mypic = result.data[0].pic;
                 if (mypic == 'undefined') {
                     document.querySelector('.myself-pic').src = "../icon/user.png";
+                    myMapPic = "../icon/user.png";
                 } else {
                     document.querySelector('.myself-pic').src = mypic;
+                    myMapPic = mypic;
                 }
                 document.querySelector('.myself-name').textContent = result.data[0].username;
+                if (location.pathname === '/map') {
+                    canLocate();
+                }
             }
         })
     // 抓取通知欄訊息
@@ -50,6 +56,11 @@ async function getData() {
                     let informDiv = document.createElement("div");
                     informDiv.className = "informs";
                     informDiv.setAttribute('data-id', result.data[i].friendEmail);
+                    if (result.data[i].roomID !== null) {
+                        informDiv.setAttribute('data-room', result.data[i].roomID);
+                        informDiv.setAttribute('onclick', "messageFriend(this)");
+                        informDiv.style.cursor = "pointer";
+                    }
                     informList.appendChild(informDiv);
                     let informImg = document.createElement("img");
                     informImg.className = "inform-pic";
@@ -64,25 +75,28 @@ async function getData() {
                     let content = result.data[i].content;
                     if (content === 1) {
                         informMsg.textContent = result.data[i].friendName + " 向你發送了好友邀請。";
+                        informDiv.appendChild(informMsg);
+                        let acceptImg = document.createElement("img");
+                        acceptImg.className = "inform-request-btn";
+                        acceptImg.src = '../icon/accept.png';
+                        acceptImg.setAttribute('data-id', result.data[i].friendEmail);
+                        acceptImg.setAttribute('onclick', "friendReponse(this,'accept')")
+                        informMsg.appendChild(acceptImg);
+                        let rejectImg = document.createElement("img");
+                        rejectImg.className = "inform-request-btn";
+                        rejectImg.src = '../icon/reject.png';
+                        rejectImg.setAttribute('data-id', result.data[i].friendEmail);
+                        rejectImg.setAttribute('onclick', "friendReponse(this,'reject')")
+                        informMsg.appendChild(rejectImg);
+                    } else if (content === 2) {
+                        informMsg.textContent = result.data[i].friendName + " 向你發送了新訊息。";
+                        informDiv.appendChild(informMsg);
                     }
-                    informDiv.appendChild(informMsg);
-                    let acceptImg = document.createElement("img");
-                    acceptImg.className = "inform-request-btn";
-                    acceptImg.src = '../icon/accept.png';
-                    acceptImg.setAttribute('data-id', result.data[i].friendEmail);
-                    acceptImg.setAttribute('onclick', "friendReponse(this,'accept')")
-                    informMsg.appendChild(acceptImg);
-                    let rejectImg = document.createElement("img");
-                    rejectImg.className = "inform-request-btn";
-                    rejectImg.src = '../icon/reject.png';
-                    rejectImg.setAttribute('data-id', result.data[i].friendEmail);
-                    rejectImg.setAttribute('onclick', "friendReponse(this,'reject')")
-                    informMsg.appendChild(rejectImg);
                 }
             }
         })
 
-    // 抓到好友資料放到側邊欄、地圖上
+    // 抓到好友資料
     fetch('/getFriendData', {
         method: 'POST',
         body: JSON.stringify({ email: email }),
@@ -122,6 +136,15 @@ async function getData() {
                     messageImg.setAttribute('data-room', result.data[i].roomID);
                     messageImg.setAttribute('onclick', "messageFriend(this)")
                     friendDiv.appendChild(messageImg);
+                    let callImg = document.createElement("img");
+                    callImg.className = "call-img";
+                    callImg.src = '../icon/call.png';
+                    callImg.setAttribute('data-room', result.data[i].roomID);
+                    callImg.setAttribute('onclick', "callFriend(this)")
+                    friendDiv.appendChild(callImg);
+                }
+                if (location.pathname === '/map') {
+                    putFriendOnMap(result);
                 }
             }
         })
@@ -292,6 +315,7 @@ function addFriend(status) {
     } else if (status == "close") {
         document.querySelector('.shadow').style.display = "none";
         document.getElementById('addFriendWindow').style.display = "none";
+        document.querySelector('.end-call-hint').style.display = "none";
     }
 }
 
@@ -334,6 +358,7 @@ function sendFriendRequest() {
                 } else if (result.ok) {
                     errorMsg.style.display = "none";
                     successMsg.style.display = "block";
+                    socket.emit("sendFriendRequest", myEmail, friendEmail);
                 }
             })
     }
@@ -453,8 +478,224 @@ function goChatroom() {
         })
 }
 
-socket.on("test event", (test) => {
-    console.log(test);
+let localStream;
+let myVideo = document.getElementById('myVideo');
+let remoteVideo = document.getElementById('remoteVideo');
+let callRoomID;
+// 取得自己的視訊畫面
+async function createMedia() {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    myVideo.srcObject = localStream;
+}
+
+let pc;
+// 建立 P2P 連接
+function createPeerConnection() {
+    const configuration = {
+        iceServers: [{
+            urls: 'stun:stun.l.google.com:19302' // Google's public STUN server
+        }]
+    };
+    pc = new RTCPeerConnection(configuration);
+    console.log(pc)
+};
+
+// 增加本地流
+function addLocalStream() {
+    pc.addStream(localStream)
+};
+
+// 監聽 ICE Server
+function onIceCandidates() {
+    // 找尋到 ICE 候選位置後，送去 Server 與另一位配對
+    pc.onicecandidate = ({ candidate }) => {
+        if (!candidate) { return; }
+        // console.log('onIceCandidate => ', candidate);
+        socket.emit("peerConnectSignaling", { candidate }, callRoomID);
+    };
+};
+
+// 監聽 ICE 連接狀態
+function onIceConnectionStateChange() {
+    pc.oniceconnectionstatechange = (evt) => {
+        console.log('ICE 伺服器狀態變更 => ', evt.target.iceConnectionState);
+    };
+}
+
+// 監聽是否有流傳入，如果有的話就顯示影像
+function onAddStream() {
+    pc.onaddstream = (event) => {
+        if (!remoteVideo.srcObject && event.stream) {
+            remoteVideo.srcObject = event.stream;
+            console.log('接收流並顯示於遠端視訊！', event);
+        }
+    }
+}
+
+let offer;
+const signalOption = {
+    offerToReceiveAudio: 1, // 是否傳送聲音流給對方
+    offerToReceiveVideo: 1, // 是否傳送影像流給對方
+};
+
+async function createSignal(isOffer) {
+    try {
+        if (!pc) {
+            console.log('尚未開啟視訊');
+            return;
+        }
+        // 呼叫 peerConnect 內的 createOffer / createAnswer
+        offer = await pc[`create${isOffer ? 'Offer' : 'Answer'}`](signalOption);
+        // 設定本地流配置
+        await pc.setLocalDescription(offer);
+        sendSignalingMessage(pc.localDescription, isOffer ? true : false)
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+function sendSignalingMessage(desc, offer) {
+    const isOffer = offer ? "offer" : "answer";
+    console.log(`寄出 ${isOffer}`);
+    socket.emit("peerConnectSignaling", { desc }, callRoomID);
+};
+
+
+// 打視訊通話給朋友
+async function callFriend(myObj) {
+    let myEmail = localStorage.getItem("user")
+    let roomID = myObj.dataset.room;
+    callRoomID = roomID;
+    document.querySelector('.shadow').style.display = "block";
+    document.querySelector('.call-div').style.display = "block";
+    await createMedia();
+    socket.emit("callFriend", myEmail, roomID);
+}
+
+// 接聽or掛斷通話
+async function responseCall(myObj, state) {
+    let roomID = myObj.dataset.room;
+    callRoomID = roomID;
+    if (state === "pickup") {
+        socket.emit("answerCall", roomID, 'pickup');
+        document.querySelector('.incoming-call-div').style.display = "none";
+        document.querySelector('.shadow').style.display = "block";
+        document.querySelector('.call-div').style.display = "block";
+        await createMedia();
+        await createPeerConnection();
+        addLocalStream();
+        onIceCandidates();
+        onIceConnectionStateChange();
+        onAddStream();
+    } else if (state === "hangup") {
+        socket.emit("answerCall", roomID, 'hangup');
+        document.querySelector('.shadow').style.display = "none";
+        document.querySelector('.incoming-call-div').style.display = "none";
+    }
+}
+
+// 關掉本地取得串流畫面
+function stopMedia() {
+    const stream = myVideo.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach(function (track) {
+        track.stop();
+    });
+    myVideo.srcObject = null;
+}
+
+// 結束通話
+function endCall() {
+    document.querySelector('.shadow').style.display = "none";
+    document.querySelector('.call-div').style.display = "none";
+    if (pc) {
+        stopMedia();
+        remoteVideo.srcObject = null;
+        pc.close();
+        pc = null;
+    }
+    socket.emit('endCall', callRoomID);
+}
+
+// 控制視訊關聲音or畫面
+let isAudio = true;
+let isVideo = true;
+function muteCall(choice) {
+    if (choice === 'audio') {
+        console.log(isAudio);
+        console.log(localStream.getAudioTracks()[0]);
+        isAudio = !isAudio;
+        localStream.getAudioTracks()[0].enabled = isAudio;
+    } else if (choice === 'video') {
+        isVideo = !isVideo;
+        localStream.getVideoTracks()[0].enabled = isVideo;
+    }
+}
+
+// 別人發送好友邀請的即時通知
+socket.on("receiveFriendRequest", (result) => {
+    document.querySelector(".noinform-msg").style.display = "none";
+    let informList = document.getElementById("inform-list");
+    let informDiv = document.createElement("div");
+    informDiv.className = "informs";
+    informDiv.setAttribute('data-id', result[0].friendEmail);
+    informList.appendChild(informDiv);
+    let informImg = document.createElement("img");
+    informImg.className = "inform-pic";
+    if (result[0].friendPic === 'undefined') {
+        informImg.src = '../icon/user.png';
+    } else {
+        informImg.src = result[0].friendPic;
+    }
+    informDiv.appendChild(informImg);
+    let informMsg = document.createElement("span");
+    informMsg.className = "inform-msg";
+    let content = result[0].content;
+    if (content === 1) {
+        informMsg.textContent = result[0].friendName + " 向你發送了好友邀請。";
+    }
+    informDiv.appendChild(informMsg);
+    let acceptImg = document.createElement("img");
+    acceptImg.className = "inform-request-btn";
+    acceptImg.src = '../icon/accept.png';
+    acceptImg.setAttribute('data-id', result[0].friendEmail);
+    acceptImg.setAttribute('onclick', "friendReponse(this,'accept')")
+    informMsg.appendChild(acceptImg);
+    let rejectImg = document.createElement("img");
+    rejectImg.className = "inform-request-btn";
+    rejectImg.src = '../icon/reject.png';
+    rejectImg.setAttribute('data-id', result[0].friendEmail);
+    rejectImg.setAttribute('onclick', "friendReponse(this,'reject')")
+    informMsg.appendChild(rejectImg);
+})
+
+// 別人發送新訊息的即時通知
+socket.on("receiveMessageInform", (result) => {
+    console.log(result)
+    document.querySelector(".noinform-msg").style.display = "none";
+    let informList = document.getElementById("inform-list");
+    let informDiv = document.createElement("div");
+    informDiv.className = "informs";
+    informDiv.setAttribute('data-id', result[0].friendEmail);
+    informDiv.setAttribute('data-room', result[0].roomID);
+    informDiv.setAttribute('onclick', "messageFriend(this)");
+    informDiv.style.cursor = "pointer";
+    informList.appendChild(informDiv);
+    let informImg = document.createElement("img");
+    informImg.className = "inform-pic";
+    if (result[0].friendPic === 'undefined') {
+        informImg.src = '../icon/user.png';
+    } else {
+        informImg.src = result[0].friendPic;
+    }
+    informDiv.appendChild(informImg);
+    let informMsg = document.createElement("span");
+    informMsg.className = "inform-msg";
+    let content = result[0].content;
+    if (content === 2) {
+        informMsg.textContent = result[0].friendName + " 向你發送了新訊息。";
+    }
+    informDiv.appendChild(informMsg);
 })
 
 // 別人接受好友邀請後新增加的room
@@ -464,5 +705,69 @@ socket.on("askJoinRoom", (roomID) => {
 // 系統發送互為好友告示
 socket.on("becomeFriend", (msg) => {
     console.log(msg);
+})
+
+// 收到別人來電通知
+socket.on("receiveCall", (result, roomID) => {
+    let incomingPic = "../icon/user.png";
+    if (result[0].pic !== "undefined") {
+        incomingPic = result[0].pic;
+    }
+    document.querySelector('.incoming-friend-pic').src = incomingPic;
+    document.querySelector('.incoming-friend-name').textContent = `${result[0].username} 撥打視訊通話給你`;
+    let bothimg = document.querySelectorAll('.incoming-call-img');
+    bothimg[0].setAttribute('data-room', roomID);
+    bothimg[1].setAttribute('data-room', roomID);
+    document.querySelector('.shadow').style.display = "block";
+    document.querySelector('.incoming-call-div').style.display = "block";
+
+})
+
+// 收到對方回覆去電結果的通知
+socket.on("answerCall", (roomID, response) => {
+    if (response === "hangup") {
+        endCall();
+        document.getElementById('end-call-msg').textContent = "對方已拒絕通話";
+        document.querySelector('.end-call-hint').style.display = "block";
+    } else if (response === "pickup") {
+        createPeerConnection();
+        addLocalStream();
+        onIceCandidates();
+        onIceConnectionStateChange();
+        onAddStream();
+        createSignal(true);
+    }
+})
+
+//接收peerConnect訊號  desc->Offer/Answer
+socket.on('peerConnectSignaling', async ({ desc, candidate }) => {
+    if (pc) {
+        console.log(pc)
+        if (desc && !pc.currentRemoteDescription) {
+            console.log('desc => ', desc);
+            // currentRemoteDescription 最近一次連線成功的相關訊息
+            await pc.setRemoteDescription(new RTCSessionDescription(desc));
+            createSignal(desc.type === 'answer' ? true : false);
+        } else if (candidate) {
+            // 新增對方 IP 候選位置
+            console.log('candidate =>', candidate);
+            pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+    }
+});
+
+socket.on("endCall", () => {
+    document.querySelector('.shadow').style.display = "none";
+    document.querySelector('.incoming-call-div').style.display = "none";
+    if (pc) {
+        document.querySelector('.shadow').style.display = "none";
+        document.querySelector('.call-div').style.display = "none";
+        stopMedia();
+        remoteVideo.srcObject = null;
+        pc.close();
+        pc = null;
+        document.getElementById('end-call-msg').textContent = "對方已結束通話";
+        document.querySelector('.end-call-hint').style.display = "block";
+    }
 })
 
