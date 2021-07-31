@@ -28,8 +28,11 @@
     </div>
     <div class="call-div">
         <video id="myVideo" autoplay playsinline muted></video>
+        <canvas id="myCvs"></canvas>
         <video id="remoteVideo" autoplay playsinline></video>
+        <canvas id="remoteCvs"></canvas>
         <div class="call-control-div">
+            <img src="../icon/blur.png" id="blurBackgroungBtn" class="call-control-img" onclick="blurBackground();">
             <img src="../icon/no-sound.png" id="muteAudioBtn" class="call-control-img" onclick="muteCall('audio');">
             <img src="../icon/no-video.png" id="muteVideoBtn" class="call-control-img" onclick="muteCall('video');">
             <img src="../icon/hangup-call.png" id="endCallBtn" class="call-control-img" onclick="endCall();">
@@ -119,6 +122,8 @@
         crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/de828d96e6.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
     <script type="text/javascript" src="../js/member.js"></script>
     <script type="text/javascript" src="../js/map.js"></script>
 </body>

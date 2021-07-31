@@ -469,6 +469,9 @@ io.on('connection', (socket) => {
         socket.broadcast.to(roomID).emit('endCall')
     })
 
+    socket.on('blurBackground', (roomID, isBackground) => {
+        socket.broadcast.to(roomID).emit('blurBackground', isBackground)
+    })
 
 
     // socket.on("test", () => {

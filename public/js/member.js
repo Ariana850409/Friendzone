@@ -480,7 +480,9 @@ function goChatroom() {
 
 let localStream;
 let myVideo = document.getElementById('myVideo');
+let ctx = document.getElementById('myCvs').getContext('2d');
 let remoteVideo = document.getElementById('remoteVideo');
+let model = null;
 let callRoomID;
 // 取得自己的視訊畫面
 async function createMedia() {
@@ -568,6 +570,7 @@ async function callFriend(myObj) {
     callRoomID = roomID;
     document.querySelector('.shadow').style.display = "block";
     document.querySelector('.call-div').style.display = "block";
+    model = await blazeface.load();
     await createMedia();
     socket.emit("callFriend", myEmail, roomID);
 }
@@ -581,6 +584,7 @@ async function responseCall(myObj, state) {
         document.querySelector('.incoming-call-div').style.display = "none";
         document.querySelector('.shadow').style.display = "block";
         document.querySelector('.call-div').style.display = "block";
+        model = await blazeface.load();
         await createMedia();
         await createPeerConnection();
         addLocalStream();
@@ -608,8 +612,10 @@ function stopMedia() {
 function endCall() {
     document.querySelector('.shadow').style.display = "none";
     document.querySelector('.call-div').style.display = "none";
+    clearInterval(myblurIntervalID);
+    clearInterval(remoteblurIntervalID);
+    stopMedia();
     if (pc) {
-        stopMedia();
         remoteVideo.srcObject = null;
         pc.close();
         pc = null;
@@ -622,13 +628,63 @@ let isAudio = true;
 let isVideo = true;
 function muteCall(choice) {
     if (choice === 'audio') {
-        console.log(isAudio);
-        console.log(localStream.getAudioTracks()[0]);
         isAudio = !isAudio;
         localStream.getAudioTracks()[0].enabled = isAudio;
     } else if (choice === 'video') {
         isVideo = !isVideo;
         localStream.getVideoTracks()[0].enabled = isVideo;
+    }
+}
+
+// 控制模糊視訊背景
+let isBackground = true;
+let myblurIntervalID;
+let remoteblurIntervalID;
+function blurBackground() {
+    if (isBackground) {
+        myblurIntervalID = setInterval(refresh(true), 10);
+        document.getElementById("myCvs").style.display = "block";
+    } else {
+        clearInterval(myblurIntervalID);
+        document.getElementById("myCvs").style.display = "none";
+    }
+    isBackground = !isBackground;
+    if (pc) {
+        socket.emit("blurBackground", callRoomID, isBackground)
+    }
+}
+
+function refresh(origin) {
+    return async function () {
+        const video = origin ? myVideo : remoteVideo;
+        const returnTensors = false;
+        const predictions = await model.estimateFaces(video, returnTensors);
+        ctx.canvas.width = video.videoWidth;
+        ctx.canvas.height = video.videoHeight;
+        if (predictions.length > 0) {
+            for (let i = 0; i < predictions.length; i++) {
+                const rightEye = predictions[i].landmarks[0];
+                const leftEye = predictions[i].landmarks[1];
+                const start = predictions[i].topLeft;
+                const end = predictions[i].bottomRight;
+                const size = [end[0] - start[0], end[1] - start[1]];
+                const faceArea = new Path2D();
+                faceArea.ellipse(
+                    (leftEye[0] + rightEye[0]) / 2, (leftEye[1] + rightEye[1]) / 2,
+                    size[0] * 0.5, size[0] * 0.8,
+                    0, 0, 2 * Math.PI
+                )
+                ctx.save();
+                ctx.clip(faceArea);
+                ctx.drawImage(video, 0, 0);
+                ctx.restore();
+            }
+        }
+        ctx.save();
+        ctx.filter = "blur(10px)";
+        ctx.globalCompositeOperation = "destination-atop";
+        ctx.drawImage(video, 0, 0);
+        ctx.restore();
     }
 }
 
@@ -743,6 +799,7 @@ socket.on("answerCall", (roomID, response) => {
 socket.on('peerConnectSignaling', async ({ desc, candidate }) => {
     if (pc) {
         console.log(pc)
+        console.log({ desc, candidate })
         if (desc && !pc.currentRemoteDescription) {
             console.log('desc => ', desc);
             // currentRemoteDescription 最近一次連線成功的相關訊息
@@ -762,6 +819,8 @@ socket.on("endCall", () => {
     if (pc) {
         document.querySelector('.shadow').style.display = "none";
         document.querySelector('.call-div').style.display = "none";
+        clearInterval(myblurIntervalID);
+        clearInterval(remoteblurIntervalID);
         stopMedia();
         remoteVideo.srcObject = null;
         pc.close();
@@ -770,4 +829,15 @@ socket.on("endCall", () => {
         document.querySelector('.end-call-hint').style.display = "block";
     }
 })
+
+socket.on("blurBackground", (isBackground) => {
+    if (isBackground) {
+        remoteblurIntervalID = setInterval(refresh(false), 10);
+        document.getElementById("remoteCvs").style.display = "block";
+    } else {
+        clearInterval(remoteblurIntervalID);
+        document.getElementById("remoteCvs").style.display = "none";
+    }
+})
+
 
