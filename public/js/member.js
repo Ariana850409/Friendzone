@@ -4,15 +4,17 @@ socket.on("connect", function () {
 });
 
 let myMapPic;
+let model = null;
 async function getData() {
     await verify();
     // 抓到個人資料
     let email = localStorage.getItem("user")
     await fetch('/getMember', {
-        method: 'POST',
-        body: JSON.stringify({ email: email }),
+        method: 'GET',
+        // body: JSON.stringify({ email: email }),
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email
         })
     })
         .then(res => {
@@ -150,6 +152,7 @@ async function getData() {
         })
     // 加入所有的room
     socket.emit("joinRoom", email);
+    model = await blazeface.load();
 }
 
 // 驗證是否為登入狀態
@@ -174,10 +177,16 @@ async function verify() {
 // 預覽頭貼
 function handleFiles(pic) {
     let previewPic = document.querySelector(".previewPic");
+    let previewMemberDataPic = document.querySelector(".member-data-pic");
     let file = pic[0];
     let reader = new FileReader();
-    reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(previewPic);
-    reader.readAsDataURL(file);
+    if (previewPic) {
+        reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(previewPic);
+        reader.readAsDataURL(file);
+    } else if (previewMemberDataPic) {
+        reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(previewMemberDataPic);
+        reader.readAsDataURL(file);
+    }
 }
 
 let errorMsg = document.querySelector('.error-msg');
@@ -304,6 +313,73 @@ function logout() {
     window.location.href = "/";
 }
 
+// 打開會員資料視窗
+function openMemberData() {
+    let nowPic = document.querySelector('.myself-pic').src;
+    let nowName = document.querySelector('.myself-name').textContent;
+    document.querySelector('.member-data-pic').src = nowPic;
+    document.querySelector('.member-data-name').textContent = `使用者名稱：${nowName}`;
+    document.getElementById('memberDataPicInput').value = "";
+    document.getElementById('change-name-input').value = "";
+    document.querySelector('.shadow').style.display = "block";
+    document.querySelector('.member-data').style.display = "block";
+    document.querySelector('.memberdata-error-msg').style.display = "none";
+    document.querySelector('.memberdata-success-msg').style.display = "none";
+}
+
+// 更改會員資料
+function changeMemberData() {
+    event.preventDefault();
+    let newPic = document.getElementById('memberDataPicInput').files[0];
+    let newName = document.getElementById('change-name-input').value;
+    let errorMsg = document.querySelector('.memberdata-error-msg');
+    let successMsg = document.querySelector('.memberdata-success-msg');
+    successMsg.textContent = "更改中...";
+    successMsg.style.display = "block";
+    errorMsg.style.display = "none";
+    document.getElementById('change-name-input').value = "";
+    if (newName === "" && typeof newPic === "undefined") {
+        errorMsg.textContent = "請輸入新名稱或上傳新頭貼";
+        errorMsg.style.display = "block";
+        successMsg.style.display = "none";
+    } else if (newName.indexOf(" ") !== -1) {
+        errorMsg.textContent = "請勿輸入空白符號";
+        errorMsg.style.display = "block";
+        successMsg.style.display = "none";
+    } else {
+        errorMsg.style.display = "none";
+        let email = localStorage.getItem("user");
+        let formData = new FormData();
+        formData.append("newPic", newPic);
+        formData.append("newName", newName);
+        formData.append("email", email);
+        fetch('/changeMemberData', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(res => {
+                return res.json();
+            }).then(result => {
+                if (result.error && result.message == "伺服器內部錯誤") {
+                    errorMsg.textContent = result.message;
+                    errorMsg.style.display = "block";
+                    successMsg.style.display = "none";
+                } else if (result.ok) {
+                    successMsg.textContent = "會員資料更改成功";
+                    successMsg.style.display = "block";
+                    if (typeof newPic !== "undefined") {
+                        document.querySelector('.myself-pic').src = result.pic;
+                        document.querySelector('.my-map-icon').src = result.pic;
+                    }
+                    if (newName !== "") {
+                        document.querySelector('.myself-name').textContent = newName;
+                        document.querySelector('.member-data-name').textContent = `使用者名稱：${newName}`;
+                    }
+                }
+            })
+    }
+}
+
 // 新增好友視窗
 function addFriend(status) {
     if (status == "open") {
@@ -316,6 +392,9 @@ function addFriend(status) {
         document.querySelector('.shadow').style.display = "none";
         document.getElementById('addFriendWindow').style.display = "none";
         document.querySelector('.end-call-hint').style.display = "none";
+        document.querySelector('.member-data').style.display = "none";
+        document.querySelector('.broadcast-window').style.display = "none";
+        document.querySelector('.receive-broadcast-div').style.display = "none";
     }
 }
 
@@ -480,9 +559,9 @@ function goChatroom() {
 
 let localStream;
 let myVideo = document.getElementById('myVideo');
-let ctx = document.getElementById('myCvs').getContext('2d');
+let myCtx = document.getElementById('myCvs').getContext('2d');
 let remoteVideo = document.getElementById('remoteVideo');
-let model = null;
+let remoteCtx = document.getElementById('remoteCvs').getContext('2d');
 let callRoomID;
 // 取得自己的視訊畫面
 async function createMedia() {
@@ -570,7 +649,6 @@ async function callFriend(myObj) {
     callRoomID = roomID;
     document.querySelector('.shadow').style.display = "block";
     document.querySelector('.call-div').style.display = "block";
-    model = await blazeface.load();
     await createMedia();
     socket.emit("callFriend", myEmail, roomID);
 }
@@ -584,7 +662,6 @@ async function responseCall(myObj, state) {
         document.querySelector('.incoming-call-div').style.display = "none";
         document.querySelector('.shadow').style.display = "block";
         document.querySelector('.call-div').style.display = "block";
-        model = await blazeface.load();
         await createMedia();
         await createPeerConnection();
         addLocalStream();
@@ -630,9 +707,19 @@ function muteCall(choice) {
     if (choice === 'audio') {
         isAudio = !isAudio;
         localStream.getAudioTracks()[0].enabled = isAudio;
+        if (!isAudio) {
+            document.getElementById("muteAudioBtn").src = "../icon/no-sound-active.png";
+        } else if (isAudio) {
+            document.getElementById("muteAudioBtn").src = "../icon/no-sound.png";
+        }
     } else if (choice === 'video') {
         isVideo = !isVideo;
         localStream.getVideoTracks()[0].enabled = isVideo;
+        if (!isVideo) {
+            document.getElementById("muteVideoBtn").src = "../icon/no-video-active.png";
+        } else if (isVideo) {
+            document.getElementById("muteVideoBtn").src = "../icon/no-video.png";
+        }
     }
 }
 
@@ -644,19 +731,22 @@ function blurBackground() {
     if (isBackground) {
         myblurIntervalID = setInterval(refresh(true), 10);
         document.getElementById("myCvs").style.display = "block";
+        document.getElementById("blurBackgroungBtn").src = "../icon/blur-active.png";
     } else {
         clearInterval(myblurIntervalID);
         document.getElementById("myCvs").style.display = "none";
+        document.getElementById("blurBackgroungBtn").src = "../icon/blur.png";
     }
-    isBackground = !isBackground;
     if (pc) {
         socket.emit("blurBackground", callRoomID, isBackground)
     }
+    isBackground = !isBackground;
 }
 
 function refresh(origin) {
     return async function () {
         const video = origin ? myVideo : remoteVideo;
+        const ctx = origin ? myCtx : remoteCtx;
         const returnTensors = false;
         const predictions = await model.estimateFaces(video, returnTensors);
         ctx.canvas.width = video.videoWidth;
@@ -695,7 +785,7 @@ socket.on("receiveFriendRequest", (result) => {
     let informDiv = document.createElement("div");
     informDiv.className = "informs";
     informDiv.setAttribute('data-id', result[0].friendEmail);
-    informList.appendChild(informDiv);
+    informList.insertBefore(informDiv, informList.firstElementChild);
     let informImg = document.createElement("img");
     informImg.className = "inform-pic";
     if (result[0].friendPic === 'undefined') {
@@ -736,7 +826,7 @@ socket.on("receiveMessageInform", (result) => {
     informDiv.setAttribute('data-room', result[0].roomID);
     informDiv.setAttribute('onclick', "messageFriend(this)");
     informDiv.style.cursor = "pointer";
-    informList.appendChild(informDiv);
+    informList.insertBefore(informDiv, informList.firstElementChild);
     let informImg = document.createElement("img");
     informImg.className = "inform-pic";
     if (result[0].friendPic === 'undefined') {
@@ -798,8 +888,6 @@ socket.on("answerCall", (roomID, response) => {
 //接收peerConnect訊號  desc->Offer/Answer
 socket.on('peerConnectSignaling', async ({ desc, candidate }) => {
     if (pc) {
-        console.log(pc)
-        console.log({ desc, candidate })
         if (desc && !pc.currentRemoteDescription) {
             console.log('desc => ', desc);
             // currentRemoteDescription 最近一次連線成功的相關訊息

@@ -24,10 +24,13 @@
                 <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" onclick="changeState('login');">登入</a>
+                            <a class="nav-link" href="#intro">網站介紹</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" onclick="changeState('register');">註冊</a>
+                            <a class="nav-link" href="#loginOrRegister" onclick="changeState('login');">登入</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#loginOrRegister" onclick="changeState('register');">註冊</a>
                         </li>
                     </ul>
                 </div>
@@ -35,7 +38,8 @@
         </div>
     </div>
     <section id="start">
-        <div class="container">
+        <img src="../icon/friends-cartoon.jpeg" class="start-pic">
+        <div class="container" id="loginOrRegister">
             <h1 class="display-5 text-center">開啟尋找朋友的旅程吧！</h1>
             <p class="lead text-center">輕鬆地分享你的所在位置來參與彼此的生活圈</p>
             <form id="loginForm">
@@ -95,42 +99,46 @@
             </form>
             <p class="error-msg text-center"></p>
             <p class="success-msg text-center">註冊成功，請重新登入</p>
-        </div>
+            <a class="btn google-login-btn" href="/auth/google">
+                <img src="../icon/google.png" class="google-img">
+                <span class="google-span">Google登入</span>
+            </a>
         </div>
     </section>
     <section id="intro">
         <div class="container">
             <div class="row">
-                <div class="col-12 col-md-4 offset-md-1">
-                    <img src="https://picsum.photos/400/300?random=1">
+                <div class="col-12 col-md-5 offset-md-1">
+                    <img src="../icon/index-01.png">
                 </div>
-                <div class="col-12 col-md-6">
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
-                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
-                        facere, sequi non vitae.</p>
+                <div class="col-12 col-md-5">
+                    <p>即使位在不同地方也能參與彼此的動態足跡，透過定位輕鬆找到附近能夠見面的好友。</p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 offset-md-1">
-                    <img src="https://picsum.photos/400/300?random=2">
+                <div class="col-12 col-md-5 offset-md-1">
+                    <img src="../icon/index-02.png">
                 </div>
-                <div class="col-12 col-md-6">
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
-                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
-                        facere, sequi non vitae.</p>
+                <div class="col-12 col-md-5">
+                    <p>廣播訊息給地圖上周邊範圍的好友，好友即時收到廣播訊息，不必辛苦地個別私訊。</p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 offset-md-1">
-                    <img src="https://picsum.photos/400/300?random=3">
+                <div class="col-12 col-md-5 offset-md-1">
+                    <img src="../icon/index-03.png">
                 </div>
-                <div class="col-12 col-md-6">
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione iure ea ducimus veniam sint
-                        debitis. Fugit officiis odio, harum possimus aliquid, quis repudiandae voluptate eos explicabo
-                        facere, sequi non vitae.</p>
+                <div class="col-12 col-md-5">
+                    <p>與好友聊天分享彼此近況，透過通知功能即時查看是否有新訊息或新的交友邀請。</p>
                 </div>
             </div>
-
+            <div class="row">
+                <div class="col-12 col-md-5 offset-md-1">
+                    <img src="../icon/index-04.png">
+                </div>
+                <div class="col-12 col-md-5">
+                    <p>透過視訊通話與好友直接交談，比起文字更無隔閡感，關閉視訊畫面一樣能藉由聲音表達。</p>
+                </div>
+            </div>
         </div>
     </section>
     <section id="footer">

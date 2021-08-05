@@ -60,6 +60,28 @@ class DB_Service {
         })
     }
 
+    // 更新會員照片
+    updateMemberPic(email, filename) {
+        return new Promise((resolve, reject) => {
+            let sql = `UPDATE members SET pic = '${filename}' WHERE email = '${email}'`
+            pool.query(sql, (err, result) => {
+                if (err) reject(new Error(err.message))
+                resolve(result)
+            })
+        })
+    }
+
+    // 更新會員名稱
+    updateMemberName(email, name) {
+        return new Promise((resolve, reject) => {
+            let sql = `UPDATE members SET username = '${name}' WHERE email = '${email}'`
+            pool.query(sql, (err, result) => {
+                if (err) reject(new Error(err.message))
+                resolve(result)
+            })
+        })
+    }
+
     // 拿會員個人資料
     getMemberData(email) {
         return new Promise((resolve, reject) => {

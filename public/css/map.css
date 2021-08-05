@@ -15,18 +15,116 @@
 }
 
 .locationNow{
-    color: #074a5c; 
-    font-size: 43px;
     position: absolute;
     z-index: 100;
-    top: 76px;
-    left: 7px;
+    top: 80px;
+    left: 6px;
+    cursor: pointer;
+}
+
+.locationNow-img{
+    width: 45px;
+    height: 45px;
+}
+
+.loudspeaker{
+    position: absolute;
+    z-index: 100;
+    top: 130px;
+    left: 6px;
     cursor: pointer;
 }
 
 .map-icon{
     border-radius: 100%;
     object-fit: cover;
+}
+
+/* 廣播訊息 */
+.broadcast-window{
+    height: 285px;
+    width: 280px;
+    z-index: 1001;
+    position: fixed;
+    background-color: #115c70;
+    left: 50%;
+    top: 150px;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    display: none;
+}
+
+.broadcast-span{
+    color: white;
+}
+
+#broadcast-meter-input{
+    width: 57px;
+    height: 30px;
+    padding: 5px;
+    display: inline;
+    background-color: rgb(241, 241, 228);
+}
+
+.broadcast-msg-input{
+    font-size: 16px;
+    width: 240px;
+    height: 85px;
+    resize: none;
+    background-color: rgb(241, 241, 228);
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+#broadcast-msg-btn{
+    margin-top: 15px;
+}
+
+.receive-broadcast-div{
+    position: fixed;
+    z-index: 1010;
+    height: 280px;
+    width: 280px;
+    background-color: #115c70;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    padding: 15px;
+    display: none;
+}
+
+.receive-broadcast-div>.close-img{
+    right: 8px;
+    top: 8px;
+}
+
+.receive-broadcast-pic{
+    height: 50px;
+    width: 50px;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+.receive-broadcast-name{
+    font-size: 20px;
+    color: white;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.receive-broadcast-msg{
+    background-color: rgb(241, 241, 228);
+    color: #7f4f24;
+    font-size: 18px;
+    word-break: break-all;
+    border-radius: 3px;
+    padding: 5px;
+    height: 90px;
+    overflow: scroll;
+    margin: 3px 0 12px 0;
+    white-space: pre-line;
 }
 
 /* friend list */
@@ -183,7 +281,7 @@
 
 /* video call */
 .incoming-call-div{
-    position: absolute;
+    position: fixed;
     z-index: 1010;
     height: 200px;
     width: 280px;
@@ -218,7 +316,7 @@
 }
 
 .call-div{
-    position: absolute;
+    position: fixed;
     top: 10%;
     left: 10%;
     width: 80%;
@@ -234,6 +332,7 @@
     border-radius: 5px;
     margin: 10px 5px;
     transform: scaleX(-1);
+    z-index: 1005;
 }
 
 #myCvs{
@@ -243,7 +342,7 @@
     border-radius: 5px;
     margin: 10px 5px;
     transform: scaleX(-1);
-    z-index: 1004;
+    z-index: 1006;
     display: none;
 }
 
@@ -252,6 +351,8 @@
     height: 100%;
     background-color: black;
     border-radius: 5px;
+    position: absolute;
+    z-index: 1003;
 }
 
 #remoteCvs{
@@ -259,8 +360,10 @@
     height: 100%;
     background-color: black;
     border-radius: 5px;
-    z-index: 1003;
+    position: absolute;
+    z-index: 1004;
     display: none;
+    object-fit: contain;
 }
 
 .call-control-div{
@@ -268,6 +371,7 @@
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 1005;
 }
 
 .call-control-img{
@@ -278,7 +382,7 @@
 }
 
 .end-call-hint{
-    position: absolute;
+    position: fixed;
     z-index: 1001;
     height: 65px;
     width: 280px;
@@ -292,6 +396,9 @@
 
 @media (max-width: 768px) {
     #myVideo {
+        max-width: 30%;
+    }
+    #myCvs{
         max-width: 30%;
     }
     .call-control-img{
@@ -308,6 +415,51 @@
         margin: 0px 1px;
     }    
 }
+
+/* 會員頁面 */
+.member-data{
+    height: 390px;
+    width: 290px;
+    z-index: 1001;
+    position: fixed;
+    background-color: #115c70;
+    left: 50%;
+    top: 150px;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    display: none;
+}
+
+.member-data-pic{
+    height: 90px;
+    width: 90px;
+    border-radius: 100%;
+    margin-right: 5px;
+    object-fit: cover;
+}
+
+#memberDataPicLabel{
+    padding: 3px;
+    width: 90px;
+    margin-top: 7px;
+}
+
+#memberDataPicInput{
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+}
+
+.member-data-name{
+    color: white;
+    font-size: 18px;
+    margin: 5px 0;
+    word-break: break-all;
+}
+
+#change-name-btn{
+    margin-top: 20px;
+}
     
 /* 通知欄 */
 #inform-list{
@@ -315,11 +467,12 @@
     height: 450px;
     z-index: 101;
     position: absolute;
-    background-color: #78b5ce;
+    background-color: #E6D7B0;
     transition: all 0.3s;
     overflow: scroll;
     right: 300px;
     top: -450px;
+    opacity: 0.9;
 }
 
 #inform-list.active {
@@ -361,6 +514,6 @@
 
 @media (max-width: 768px) {
     #inform-list {
-        right: 0;
+        left: 0;
     }
 }

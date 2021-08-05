@@ -50,10 +50,48 @@
             <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
         </p>
     </div>
+    <div class="container text-center member-data">
+        <p class="window-header">修改會員資料
+            <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
+        </p>
+        <img class="member-data-pic">
+        <label class="btn btn-primary mx-auto d-block" id="memberDataPicLabel">上傳新頭貼
+            <input type="file" accept="image/*" name="profile" id="memberDataPicInput"
+                onchange="handleFiles(this.files)">
+        </label>
+        <div>
+            <p class="member-data-name"></p>
+            <input type="text" class="form-control" placeholder="輸入新的使用者名稱" id="change-name-input">
+        </div>
+        <button class="btn btn-primary" id="change-name-btn" onclick="changeMemberData()">確認更改</button>
+        <p class="request-error-msg memberdata-error-msg"></p>
+        <p class="request-success-msg memberdata-success-msg"></p>
+    </div>
+    <div class="container text-center broadcast-window">
+        <p class="window-header">發送廣播訊息
+            <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
+        </p>
+        <div class="mb-3">
+            <span class="broadcast-span">廣播給方圓</span>
+            <input type="number" min="1" class="form-control" placeholder="0" id="broadcast-meter-input">
+            <span class="broadcast-span">公里內的好友</span>
+        </div>
+        <textarea class="broadcast-msg-input"></textarea>
+        <button class="btn btn-primary" id="broadcast-msg-btn" onclick="broadcastMessage();">送出訊息</button>
+        <p class="request-error-msg broadcast-error-msg"></p>
+        <p class="request-success-msg broadcast-success-msg"></p>
+    </div>
+    <div class="text-center receive-broadcast-div">
+        <img src="../icon/close.png" class="close-img" onclick="addFriend('close');">
+        <img class="receive-broadcast-pic">
+        <span class="receive-broadcast-name"></span>
+        <div class="receive-broadcast-msg"></div>
+        <button class="btn btn-primary" id="response-broadcast-btn" onclick="messageFriend(this)">回覆</button>
+    </div>
     <div id="navbar">
         <div class="container-fluid">
             <nav class="navbar navbar-expand-lg navbar-dark">
-                <a class="navbar-brand" href="#">Friend Zone</a>
+                <a class="navbar-brand" href="/map">Friend Zone</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                     aria-label="Toggle navigation">
@@ -75,7 +113,7 @@
                             <a class="nav-link" onclick="goChatroom();">訊息</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">會員資料</a>
+                            <a class="nav-link" onclick="openMemberData();">會員資料</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link dropdown-toggle" id="friendCollapse">好友名單</a>
@@ -100,7 +138,10 @@
         </nav>
 
         <span class="locationNow">
-            <i class="fas fa-compass"></i>
+            <img src="../icon/compass.png" class="locationNow-img">
+        </span>
+        <span class="loudspeaker" onclick="openBroadcastWindow();">
+            <img src="../icon/loudspeaker.png" class="locationNow-img">
         </span>
     </div>
 
@@ -120,9 +161,8 @@
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"
         integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
         crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/de828d96e6.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
     <script type="text/javascript" src="../js/member.js"></script>
     <script type="text/javascript" src="../js/map.js"></script>

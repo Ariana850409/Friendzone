@@ -9,8 +9,10 @@ const jwt = require('jsonwebtoken')
 const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-const { v4: uuidv4 } = require('uuid');
-const moment = require('moment');
+const { v4: uuidv4 } = require('uuid')
+const moment = require('moment')
+const passport = require('passport')
+require('./passport')(passport)
 app.use(express.json())
 app.use(express.static('public'))
 app.use('/css', express.static(__dirname + 'public/css'))
@@ -18,6 +20,7 @@ app.use('/js', express.static(__dirname + 'public/js'))
 app.use('/icon', express.static(__dirname + 'public/icon'))
 app.set('views', './views')
 app.set('view engine', 'ejs')
+app.use(passport.initialize())
 
 
 app.get('/', (req, res) => {
@@ -91,6 +94,28 @@ app.patch('/login', async (req, res) => {
     }
 })
 
+app.get('/auth/google', passport.authenticate('google', { session: false, scope: ['profile', 'email'] }))
+
+app.get('/auth/google/callback',
+    passport.authenticate('google', { session: false, failureRedirect: '/' }),
+    (req, res) => {
+        let user = {
+            email: req.user,
+        }
+        jwt.sign({ user }, 'temp_secretkey', { expiresIn: '24h' }, (err, token) => {
+            const htmlWithEmbeddedJWT = `
+            <html>
+            <script>
+                window.localStorage.setItem('token', '${token}');
+                window.location.href = '/map';
+            </script>
+            </html>
+            `
+            res.send(htmlWithEmbeddedJWT);
+        })
+    }
+)
+
 app.patch('/verify', (req, res) => {
     try {
         let bearerHeader = req.headers['authorization']
@@ -141,9 +166,10 @@ app.post('/latlng', async (req, res) => {
     }
 })
 
-app.post('/getMember', async (req, res) => {
+app.get('/getMember', async (req, res) => {
     try {
-        let email = req.body.email
+        // let email = req.body.email
+        let email = req.headers['user']
         let result = await db_Service.getMemberData(email)
         res.json({
             ok: true,
@@ -207,6 +233,29 @@ app.post('/addFriend', async (req, res) => {
         res.json({
             ok: true
         })
+    } catch (err) {
+        console.log(err)
+        res.json({
+            error: true, message: "伺服器內部錯誤"
+        })
+    }
+})
+
+app.post('/changeMemberData', upload.single('newPic'), async (req, res) => {
+    try {
+        let file = req.file
+        let name = req.body.newName
+        let email = req.body.email
+        let filename
+        if (typeof (file) !== "undefined") {
+            let s3result = await uploadFile(file)
+            filename = "https://d1ggvmbnmq1itc.cloudfront.net/" + file.filename
+            await db_Service.updateMemberPic(email, filename)
+        }
+        if (name !== "") {
+            await db_Service.updateMemberName(email, name)
+        }
+        res.json({ ok: true, pic: filename })
     } catch (err) {
         console.log(err)
         res.json({
@@ -472,6 +521,11 @@ io.on('connection', (socket) => {
     socket.on('blurBackground', (roomID, isBackground) => {
         socket.broadcast.to(roomID).emit('blurBackground', isBackground)
     })
+
+    socket.on('broadcastMessage', (senderPic, senderName, roomID, content) => {
+        socket.broadcast.to(roomID).emit('broadcastMessage', senderPic, senderName, content, roomID)
+    })
+
 
 
     // socket.on("test", () => {
