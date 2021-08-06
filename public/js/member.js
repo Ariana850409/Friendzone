@@ -565,8 +565,12 @@ let remoteCtx = document.getElementById('remoteCvs').getContext('2d');
 let callRoomID;
 // 取得自己的視訊畫面
 async function createMedia() {
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-    myVideo.srcObject = localStream;
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        myVideo.srcObject = localStream;
+    } catch{
+        alert('尚未開啟視訊');
+    }
 }
 
 let pc;
@@ -650,7 +654,9 @@ async function callFriend(myObj) {
     document.querySelector('.shadow').style.display = "block";
     document.querySelector('.call-div').style.display = "block";
     await createMedia();
-    socket.emit("callFriend", myEmail, roomID);
+    if (localStream) {
+        socket.emit("callFriend", myEmail, roomID);
+    }
 }
 
 // 接聽or掛斷通話
@@ -658,16 +664,20 @@ async function responseCall(myObj, state) {
     let roomID = myObj.dataset.room;
     callRoomID = roomID;
     if (state === "pickup") {
-        socket.emit("answerCall", roomID, 'pickup');
-        document.querySelector('.incoming-call-div').style.display = "none";
-        document.querySelector('.shadow').style.display = "block";
-        document.querySelector('.call-div').style.display = "block";
         await createMedia();
-        await createPeerConnection();
-        addLocalStream();
-        onIceCandidates();
-        onIceConnectionStateChange();
-        onAddStream();
+        if (localStream) {
+            await createPeerConnection();
+            addLocalStream();
+            onIceCandidates();
+            onIceConnectionStateChange();
+            onAddStream();
+            socket.emit("answerCall", roomID, 'pickup');
+            document.querySelector('.incoming-call-div').style.display = "none";
+            document.querySelector('.shadow').style.display = "block";
+            document.querySelector('.call-div').style.display = "block";
+        } else {
+            responseCall(myObj, 'hangup');
+        }
     } else if (state === "hangup") {
         socket.emit("answerCall", roomID, 'hangup');
         document.querySelector('.shadow').style.display = "none";
@@ -689,6 +699,14 @@ function stopMedia() {
 function endCall() {
     document.querySelector('.shadow').style.display = "none";
     document.querySelector('.call-div').style.display = "none";
+    isAudio = true;
+    isVideo = true;
+    isBackground = true;
+    document.getElementById("muteAudioBtn").src = "../icon/no-sound.png";
+    document.getElementById("muteVideoBtn").src = "../icon/no-video.png";
+    document.getElementById("blurBackgroungBtn").src = "../icon/blur.png";
+    document.getElementById("myCvs").style.display = "none";
+    document.getElementById("remoteCvs").style.display = "none";
     clearInterval(myblurIntervalID);
     clearInterval(remoteblurIntervalID);
     stopMedia();
@@ -907,6 +925,14 @@ socket.on("endCall", () => {
     if (pc) {
         document.querySelector('.shadow').style.display = "none";
         document.querySelector('.call-div').style.display = "none";
+        isAudio = true;
+        isVideo = true;
+        isBackground = true;
+        document.getElementById("muteAudioBtn").src = "../icon/no-sound.png";
+        document.getElementById("muteVideoBtn").src = "../icon/no-video.png";
+        document.getElementById("blurBackgroungBtn").src = "../icon/blur.png";
+        document.getElementById("myCvs").style.display = "none";
+        document.getElementById("remoteCvs").style.display = "none";
         clearInterval(myblurIntervalID);
         clearInterval(remoteblurIntervalID);
         stopMedia();

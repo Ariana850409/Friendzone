@@ -7,7 +7,7 @@ module.exports = function (passport) {
     passport.use(new GoogleStrategy({
         clientID: process.env.Google_Client_ID,
         clientSecret: process.env.Google_Client_Secret,
-        callbackURL: '/auth/google/callback'
+        callbackURL: 'https://friendzone.tw/auth/google/callback'
     },
         async (accessToken, refreshToken, profile, done) => {
             let email = profile.emails[0].value
