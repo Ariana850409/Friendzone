@@ -504,6 +504,12 @@ function friendReponse(myObj, status) {
                     messageImg.setAttribute('data-room', result.room);
                     messageImg.setAttribute('onclick', "messageFriend(this)")
                     friendDiv.appendChild(messageImg);
+                    let callImg = document.createElement("img");
+                    callImg.className = "call-img";
+                    callImg.src = '../icon/call.png';
+                    callImg.setAttribute('data-room', result.room);
+                    callImg.setAttribute('onclick', "callFriend(this)")
+                    friendDiv.appendChild(callImg);
                     socket.emit("joinNewRoom", result.room, 0);
                     socket.emit("friendJoinNewRoom", friendID, result.room);
                 }

@@ -45,6 +45,7 @@ map.addLayer(osm);
 // circle.bindPopup("這是圓圈。");
 // polygon.bindPopup("這是多邊形。");
 
+
 let popup = L.popup();
 function onMapClick(e) {
     popup
@@ -53,6 +54,7 @@ function onMapClick(e) {
         .openOn(map);
 }
 map.on('click', onMapClick);
+
 
 // 進行定位
 function onLocationFound(e) {
@@ -116,10 +118,12 @@ let broadcastMeterInput = document.getElementById('broadcast-meter-input');
 function broadcastFriend(meter) {
     let broadcastList = [];
     for (let i = 0; i < friendData.length; i++) {
-        let latlng = eval('(' + friendData[i].latlng + ')');
-        let distance = latlngNow.distanceTo(latlng) / 1000;
-        if (distance <= meter) {
-            broadcastList.push(friendData[i])
+        if (friendData[i].latlng !== null) {
+            let latlng = eval('(' + friendData[i].latlng + ')');
+            let distance = latlngNow.distanceTo(latlng) / 1000;
+            if (distance <= meter) {
+                broadcastList.push(friendData[i])
+            }
         }
     }
     return broadcastList;
