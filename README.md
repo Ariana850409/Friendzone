@@ -42,14 +42,13 @@ Call friends directly if you prefer communicating with others by voice and face.
 ## Side Features
 ### Login / Register
 Register your own account or use Google login.</br>
-![截圖 2021-08-13 下午9 34 03](https://user-images.githubusercontent.com/73774991/129366517-6e29e4fb-92a7-4a6d-a77b-e473dc7353c5.png)
-![截圖 2021-08-13 下午9 34 18](https://user-images.githubusercontent.com/73774991/129366903-b6a15a26-8668-4bb5-ad21-4fdd94e95480.png)
+![local_gif-06](https://user-images.githubusercontent.com/73774991/129489023-1054a6c9-006a-49ac-af9d-c407f49b493e.gif)
 ### Member Data
 Easily change your profile picture or display name.</br>
-![截圖 2021-08-13 下午9 33 18](https://user-images.githubusercontent.com/73774991/129366505-e1fadae9-af1f-415e-8467-b7e0fc60c7e6.png)
+![local_gif-07](https://user-images.githubusercontent.com/73774991/129489025-0c99c76a-a933-47d2-90aa-2fe951b7b133.gif)
 ### Friend Request
 Add friend by their email, account in this website is always unique.</br>
-![截圖 2021-08-13 下午9 33 30](https://user-images.githubusercontent.com/73774991/129366515-017cd804-ec1f-42d4-bad0-d201622510f9.png)
+![local_gif-08](https://user-images.githubusercontent.com/73774991/129489028-57142345-ac65-4ca3-b05f-3a621d301f32.gif)
 
 
 
