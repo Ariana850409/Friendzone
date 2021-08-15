@@ -96,9 +96,6 @@ class DB_Service {
     // 拿互為好友的好友資料
     getFriendData(email) {
         return new Promise((resolve, reject) => {
-            // let sql = `select username,email,pic from members where email in(select f1.user 
-            //     from friendlist as f1 inner join friendlist as f2 on f1.user = f2.friend 
-            //     and f1.friend = f2.user where f1.friend = '${email}')`
             let sql = `SELECT members.username,members.email,members.pic,members.latlng,
                 DATE_FORMAT(members.latlng_update, '%Y-%m-%d %H:%i:%s') AS latlng_update,
                 friendlist.roomID FROM friendlist INNER JOIN members ON 
@@ -290,49 +287,6 @@ class DB_Service {
             })
         })
     }
-
-    // 建立table -> members
-    table_mambers() {
-        return new Promise((resolve, reject) => {
-            let sql = "CREATE TABLE members(username VARCHAR(255),email VARCHAR(255),password VARCHAR(255),pic VARCHAR(255),latlng VARCHAR(255),PRIMARY KEY(email))"
-            pool.query(sql, (err, result) => {
-                if (err) reject(new Error(err.message))
-                resolve(result)
-            })
-        })
-    }
-
-    // 建立table -> friendlist
-    table_friendlist() {
-        return new Promise((resolve, reject) => {
-            let sql = "CREATE TABLE friendlist(user VARCHAR(255),friend VARCHAR(255),roomID VARCHAR(255),latestMessage VARCHAR(255),latestTime DATETIME,PRIMARY KEY(user, friend),KEY(friend, user),CONSTRAINT `fk_user` FOREIGN KEY (user) REFERENCES members(email),CONSTRAINT `fk_friend` FOREIGN KEY (friend) REFERENCES members(email))"
-            pool.query(sql, (err, result) => {
-                if (err) reject(new Error(err.message))
-                resolve(result)
-            })
-        })
-    }
-    // 建立table -> notification
-    table_notification() {
-        return new Promise((resolve, reject) => {
-            let sql = "CREATE TABLE notification(id INT AUTO_INCREMENT,userEmail VARCHAR(255),friendName VARCHAR(255),friendEmail VARCHAR(255),friendPic VARCHAR(255),content INT,PRIMARY KEY(id))"
-            pool.query(sql, (err, result) => {
-                if (err) reject(new Error(err.message))
-                resolve(result)
-            })
-        })
-    }
-    // 建立table -> conversation
-    table_conversation() {
-        return new Promise((resolve, reject) => {
-            let sql = "CREATE TABLE conversation(id INT AUTO_INCREMENT,sender VARCHAR(255),roomID VARCHAR(255),content VARCHAR(255),time DATETIME,PRIMARY KEY(id))"
-            pool.query(sql, (err, result) => {
-                if (err) reject(new Error(err.message))
-                resolve(result)
-            })
-        })
-    }
-
 }
 
 module.exports = DB_Service

@@ -1,14 +1,8 @@
 let latlngNow;
 let friendData;
 
-// 建立 Leaflet 地圖
 let map = L.map('mapid', { attributionControl: false });
-
-// 設定經緯度座標
-// map.setView(new L.LatLng(22.992, 120.239), 12);
 let mysite = map.locate({ setView: true, watch: true });
-
-// 設定圖資來源
 let osmUrl = 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
 let osm = new L.TileLayer(osmUrl, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', minZoom: 8, maxZoom: 16 });
 L.control.attribution({
@@ -16,56 +10,10 @@ L.control.attribution({
 }).addTo(map);
 map.addLayer(osm);
 
-// var peopleIcon = L.icon({
-//     iconUrl: '../icon/user.png',
-//     iconSize: [38, 38], // size of the icon
-//     iconAnchor: [18, 24], // point of the icon which will correspond to marker's location
-//     popupAnchor: [-3, -56] // point from which the popup should open relative to the iconAnchor
-// });
-// L.marker([22.992, 120.339], { icon: peopleIcon }).addTo(map).bindPopup("Anna");
-
-// let marker = L.marker([22.992, 120.239]).addTo(map);
-// let circle = L.circle(
-//     [22.988, 120.220],   // 圓心座標
-//     1000,                // 半徑（公尺）
-//     {
-//         color: 'red',      // 線條顏色
-//         fillColor: '#f03', // 填充顏色
-//         fillOpacity: 0.5   // 透明度
-//     }
-// ).addTo(map);
-// let polygon = L.polygon([
-//     [22.992, 120.289],
-//     [22.982, 120.299],
-//     [22.970, 120.267],
-//     [22.990, 120.267]
-// ]).addTo(map);
-
-// marker.bindPopup("<strong>地標</strong><br>標示的位置。").openPopup();
-// circle.bindPopup("這是圓圈。");
-// polygon.bindPopup("這是多邊形。");
-
-
-let popup = L.popup();
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("經緯度座標：" + e.latlng.toString())
-        .openOn(map);
-}
-map.on('click', onMapClick);
-
-
 // 進行定位
 function onLocationFound(e) {
     latlngNow = e.latlng;
     let radius = e.accuracy;
-    // let divIcon = L.divIcon({
-    //     iconSize: [50, 50],
-    //     iconAnchor: [18, 24],
-    //     className: 'my-div-icon'
-    // });
-    // L.marker(e.latlng, { icon: divIcon }).addTo(map);
     let markerIcon = L.icon({
         iconUrl: '../icon/marker.png',
         iconSize: [60, 60],
@@ -95,7 +43,6 @@ function canLocate() {
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
 }
-
 
 // 地圖回到現在位置
 $('.locationNow').on('click', function () {
@@ -155,7 +102,7 @@ function broadcastMessage() {
         } else {
             for (let i = 0; i < messageList.length; i++) {
                 socket.emit("broadcastMessage", senderPic, senderName, messageList[i].roomID, content);
-                fetch('/sendMessage', {
+                fetch('/message', {
                     method: 'POST',
                     body: JSON.stringify({ sender: sender, roomID: messageList[i].roomID, content: content }),
                     headers: new Headers({
@@ -206,7 +153,9 @@ function sendLocation() {
             .then(res => {
                 return res.json();
             }).then(result => {
-                // console.log(result);
+                if (result.error) {
+                    console.log(result.message);
+                }
             })
     }
 

@@ -4,11 +4,11 @@ let screen = document.querySelector(".chatzoom-screen");
 async function getChatData() {
     await getData();
     // 抓到所有聊天欄位
-    await fetch('/getChatList', {
-        method: 'POST',
-        body: JSON.stringify({ email: email }),
+    await fetch('/chatroom', {
+        method: 'GET',
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email
         })
     })
         .then(res => {
@@ -62,11 +62,12 @@ async function getChatData() {
             }
         })
     // 抓出指定room的個人聊天內容
-    await fetch('/getChatData', {
-        method: 'POST',
-        body: JSON.stringify({ email: email, roomID: roomID }),
+    await fetch('/message', {
+        method: 'GET',
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email,
+            'room': roomID
         })
     })
         .then(res => {
@@ -114,41 +115,13 @@ async function getChatData() {
         })
 }
 
-// const socket = io();
-// 當觸發連線建立事件
-// 發送 greet 事件給伺服器
-// socket.on("connect", function () {
-//     console.log('success')
-// });
-
-// socket.on('reconnect', function () {
-//     console.log('you have been reconnected');
-//     // where username is a global variable for the client
-//     socket.emit('user-reconnected', username);
-// });
-
-// socket.emit("send", (msg) => {
-//     socket.emit("greet");
-// });
-
-// socket.on("msg", (msg) => {
-//     document.getElementById('msg').textContent = msg;
-// });
-
-
-// 當收到伺服器回傳到 greet 事件
-// 將內容轉到 div 中呈現
-// socket.on("greet", function (msg) {
-//     document.getElementById("msg").innerText = msg;
-// });
-
 let messageInput = document.querySelector(".chatzoom-input");
 // 送出內容
 function sendMessage() {
     let content = messageInput.value;
     if (content !== "" && content.replace(/ /g, "") !== "") {
         socket.emit("sendMessage", email, roomID, content);
-        fetch('/sendMessage', {
+        fetch('/message', {
             method: 'POST',
             body: JSON.stringify({ sender: email, roomID: roomID, content: content }),
             headers: new Headers({

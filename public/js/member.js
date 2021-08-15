@@ -1,17 +1,14 @@
 const socket = io();
-socket.on("connect", function () {
-    console.log('success')
-});
+socket.on("connect", () => { });
 
 let myMapPic;
 let model = null;
 async function getData() {
     await verify();
-    // 抓到個人資料
     let email = localStorage.getItem("user")
-    await fetch('/getMember', {
+    // 抓到個人資料
+    await fetch('/member', {
         method: 'GET',
-        // body: JSON.stringify({ email: email }),
         headers: new Headers({
             'Content-Type': 'application/json',
             'user': email
@@ -38,11 +35,11 @@ async function getData() {
             }
         })
     // 抓取通知欄訊息
-    fetch('/getInform', {
-        method: 'POST',
-        body: JSON.stringify({ email: email }),
+    fetch('/inform', {
+        method: 'GET',
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email
         })
     })
         .then(res => {
@@ -99,11 +96,11 @@ async function getData() {
         })
 
     // 抓到好友資料
-    fetch('/getFriendData', {
-        method: 'POST',
-        body: JSON.stringify({ email: email }),
+    fetch('/friend', {
+        method: 'GET',
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email
         })
     })
         .then(res => {
@@ -353,8 +350,8 @@ function changeMemberData() {
         formData.append("newPic", newPic);
         formData.append("newName", newName);
         formData.append("email", email);
-        fetch('/changeMemberData', {
-            method: 'POST',
+        fetch('/member', {
+            method: 'PATCH',
             body: formData,
         })
             .then(res => {
@@ -420,7 +417,7 @@ function sendFriendRequest() {
         errorMsg.style.display = "none";
         let myEmail = localStorage.getItem("user")
         let data = { user: myEmail, friend: friendEmail };
-        fetch('/addFriend', {
+        fetch('/friend', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: new Headers({
@@ -464,7 +461,7 @@ function friendReponse(myObj, status) {
     let informDiv = document.querySelector(`[data-id='${friendID}']`);
     informDiv.remove();
     if (status === "accept") {
-        fetch('/acceptRequest', {
+        fetch('/request', {
             method: 'POST',
             body: JSON.stringify({ myID: myID, friendID: friendID }),
             headers: new Headers({
@@ -516,7 +513,7 @@ function friendReponse(myObj, status) {
             })
 
     } else if (status === "reject") {
-        fetch('/rejectRequest', {
+        fetch('/request', {
             method: 'DELETE',
             body: JSON.stringify({ myID: myID, friendID: friendID }),
             headers: new Headers({
@@ -543,11 +540,11 @@ function messageFriend(myObj) {
 // 進入聊天室頁面
 function goChatroom() {
     let email = localStorage.getItem("user")
-    fetch('/getChatList', {
-        method: 'POST',
-        body: JSON.stringify({ email: email }),
+    fetch('/chatroom', {
+        method: 'GET',
         headers: new Headers({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'user': email
         })
     })
         .then(res => {
@@ -584,11 +581,10 @@ let pc;
 function createPeerConnection() {
     const configuration = {
         iceServers: [{
-            urls: 'stun:stun.l.google.com:19302' // Google's public STUN server
+            urls: 'stun:stun.l.google.com:19302'
         }]
     };
     pc = new RTCPeerConnection(configuration);
-    console.log(pc)
 };
 
 // 增加本地流
@@ -601,7 +597,6 @@ function onIceCandidates() {
     // 找尋到 ICE 候選位置後，送去 Server 與另一位配對
     pc.onicecandidate = ({ candidate }) => {
         if (!candidate) { return; }
-        // console.log('onIceCandidate => ', candidate);
         socket.emit("peerConnectSignaling", { candidate }, callRoomID);
     };
 };
@@ -609,7 +604,6 @@ function onIceCandidates() {
 // 監聽 ICE 連接狀態
 function onIceConnectionStateChange() {
     pc.oniceconnectionstatechange = (evt) => {
-        console.log('ICE 伺服器狀態變更 => ', evt.target.iceConnectionState);
     };
 }
 
@@ -618,21 +612,20 @@ function onAddStream() {
     pc.onaddstream = (event) => {
         if (!remoteVideo.srcObject && event.stream) {
             remoteVideo.srcObject = event.stream;
-            console.log('接收流並顯示於遠端視訊！', event);
         }
     }
 }
 
 let offer;
 const signalOption = {
-    offerToReceiveAudio: 1, // 是否傳送聲音流給對方
-    offerToReceiveVideo: 1, // 是否傳送影像流給對方
+    offerToReceiveAudio: 1,
+    offerToReceiveVideo: 1,
 };
 
 async function createSignal(isOffer) {
     try {
         if (!pc) {
-            console.log('尚未開啟視訊');
+            console.alert('尚未開啟視訊');
             return;
         }
         // 呼叫 peerConnect 內的 createOffer / createAnswer
@@ -647,7 +640,6 @@ async function createSignal(isOffer) {
 
 function sendSignalingMessage(desc, offer) {
     const isOffer = offer ? "offer" : "answer";
-    console.log(`寄出 ${isOffer}`);
     socket.emit("peerConnectSignaling", { desc }, callRoomID);
 };
 
@@ -841,7 +833,6 @@ socket.on("receiveFriendRequest", (result) => {
 
 // 別人發送新訊息的即時通知
 socket.on("receiveMessageInform", (result) => {
-    console.log(result)
     document.querySelector(".noinform-msg").style.display = "none";
     let informList = document.getElementById("inform-list");
     let informDiv = document.createElement("div");
@@ -874,7 +865,6 @@ socket.on("askJoinRoom", (roomID) => {
 })
 // 系統發送互為好友告示
 socket.on("becomeFriend", (msg) => {
-    console.log(msg);
 })
 
 // 收到別人來電通知
@@ -913,13 +903,11 @@ socket.on("answerCall", (roomID, response) => {
 socket.on('peerConnectSignaling', async ({ desc, candidate }) => {
     if (pc) {
         if (desc && !pc.currentRemoteDescription) {
-            console.log('desc => ', desc);
             // currentRemoteDescription 最近一次連線成功的相關訊息
             await pc.setRemoteDescription(new RTCSessionDescription(desc));
             createSignal(desc.type === 'answer' ? true : false);
         } else if (candidate) {
             // 新增對方 IP 候選位置
-            console.log('candidate =>', candidate);
             pc.addIceCandidate(new RTCIceCandidate(candidate));
         }
     }
