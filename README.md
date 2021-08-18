@@ -9,8 +9,9 @@ Also can register your own account or use Google login.
 ![structre拷貝](https://user-images.githubusercontent.com/73774991/129366481-273dd3b3-ddc9-4799-9ebf-d0e863d6430e.png)
 
 
-## Database Structure (MySQL)
-![database](https://user-images.githubusercontent.com/73774991/129360399-68d2c26d-f313-4bb5-b7f1-d25891ff94bb.png)
+## Database Schema (MySQL)
+![database](https://user-images.githubusercontent.com/73774991/129869136-12abb111-0a27-4490-abfc-bc3050e07677.png)
+
 
 ## Main Features
 ### Location Sharing
