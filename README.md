@@ -5,7 +5,7 @@ Test account: test@gmail.com</br>
 Test password: test</br>
 Also can register your own account or use Google login.
 
-## System Structure
+## Architecture
 ![structre拷貝](https://user-images.githubusercontent.com/73774991/129366481-273dd3b3-ddc9-4799-9ebf-d0e863d6430e.png)
 
 
